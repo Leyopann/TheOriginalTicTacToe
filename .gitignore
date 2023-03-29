@@ -1,23 +1,225 @@
-# Compiled class file
-*.class
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Original Tic Tac Toe Game</title>
+    <style>
+      body {
+        background-color: #e6e6e6;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
 
-# Log file
-*.log
+      .game-board {
+        margin: 50px auto;
+        width: 300px;
+        height: 300px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-wrap: wrap;
+      }
 
-# BlueJ files
-*.ctxt
+      .game-board .cell {
+        width: 33.33%;
+        height: 33.33%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 70px;
+        cursor: pointer;
+        background-color: #8bd3dd;
+        color: #fff;
+        transition: all 0.3s ease-in-out;
+      }
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+      .game-board .cell:hover {
+        background-color: #c4e0e5;
+      }
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+      .game-board .cell.player1 {
+        color: #ff5858;
+      }
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+      .game-board .cell.player2 {
+        color: #60d394;
+      }
+
+      .game-board .cell.winner-cell {
+        background-color: #fff;
+        color: #ffdd59;
+        font-weight: bold;
+      }
+
+      .reset-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #4d4d4d;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .reset-button:hover {
+        background-color: #333;
+      }
+
+      .game-status {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #444;
+      }
+
+      p {
+        text-align: center;
+        font-size: 16px;
+        margin-top: 20px;
+        color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center;">The Original Tic Tac Toe Game</h1>
+    <div class="game-board">
+      <div class="cell" data-cell-index="0"></div>
+      <div class="cell" data-cell-index="1"></div>
+      <div class="cell" data-cell-index="2"></div>
+      <div class="cell" data-cell-index="3"></div>
+      <div class="cell" data-cell-index="4"></div>
+      <div class="cell" data-cell-index="5"></div>
+      <div class="cell" data-cell-index="6"></div>
+      <div class="cell" data-cell-index="7"></div>
+      <div class="cell" data-cell-index="8"></div>
+    </div>
+    <button class="reset-button">Reset Game</button>
+    <p class="game-status"></p>
+
+    <script>
+      const cellElements = document.querySelectorAll('.cell');
+      const resetButton = document.querySelector('.reset-button');
+      const gameStatus = document.querySelector('.game-status');
+  const PLAYER_X_CLASS = 'player1';
+  const PLAYER_O_CLASS = 'player2';
+  const WINNING_COMBINATIONS = [    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  let playerTurn = false;
+  let gameOver = false;
+
+  startGame();
+
+  resetButton.addEventListener('click', startGame);
+
+  function startGame() {
+    playerTurn = false;
+    gameOver = false;
+    cellElements.forEach((cell) => {
+      cell.classList.remove(PLAYER_X_CLASS);
+      cell.classList.remove(PLAYER_O_CLASS);
+      cell.classList.remove('winner-cell');
+      cell.removeEventListener('click', handleClick);
+      cell.addEventListener('click', handleClick, { once: true });
+    });
+    setGameStatus('');
+  }
+
+  function handleClick(e) {
+    if (gameOver) return;
+    const cell = e.target;
+    const currentClass = playerTurn ? PLAYER_O_CLASS : PLAYER_X_CLASS;
+    placeMark(cell, currentClass);
+    if (checkWin(currentClass)) {
+      endGame(false);
+    } else if (isDraw()) {
+      endGame(true);
+    } else {
+      swapTurns();
+      setGameStatus(`${playerTurn ? "O's" : "X's"} turn`);
+    }
+  }
+
+  function placeMark(cell, currentClass) {
+    cell.classList.add(currentClass);
+    cell.innerHTML = playerTurn ? 'O' : 'X';
+  }
+
+  function swapTurns() {
+    playerTurn = !playerTurn;
+  }
+
+  function checkWin(currentClass) {
+    return WINNING_COMBINATIONS.some((combination) => {
+      return combination.every((index) => {
+        return cellElements[index].classList.contains(currentClass);
+      });
+    });
+  }
+
+  function endGame(draw) {
+    gameOver = true;
+    if (draw) {
+      setGameStatus('Draw!');
+    } else {
+      setGameStatus(`${playerTurn ? "O's" : "X's"} Wins!`);
+    }
+    highlightWinningCells();
+  }
+
+  function highlightWinningCells() {
+    WINNING_COMBINATIONS.forEach((combination) => {
+      const cell1 = cellElements[combination[0]];
+      const cell2 = cellElements[combination[1]];
+      const cell3 = cellElements[combination[2]];
+      if (
+        cell1.classList.contains(PLAYER_X_CLASS) &&
+        cell2.classList.contains(PLAYER_X_CLASS) &&
+        cell3.classList.contains(PLAYER_X_CLASS)
+      ) {
+        cell1.classList.add('winner-cell');
+        cell2.classList.add('winner-cell');
+        cell3.classList.add('winner-cell');
+      } else if (
+        cell1.classList.contains(PLAYER_O_CLASS) &&
+        cell2.classList.contains(PLAYER_O_CLASS) &&
+        cell3.classList.contains(PLAYER_O_CLASS)
+      ) {
+        cell1.classList.add('winner-cell');
+        cell2.classList.add('winner-cell');
+        cell3.classList.add('winner-cell');
+      }
+    });
+  }
+
+  function isDraw() {
+    return [...cellElements].every((cell) => {
+      return (
+        cell.classList.contains(PLAYER_X_CLASS) ||
+        cell.classList.contains(PLAYER_O_CLASS)
+      );
+    });
+  }
+
+  function setGameStatus(message) {
+    gameStatus.innerText = message;
+  }
+</script>
+<p style="color: #777; margin-top: 20px;">The Original Engineer - Emre Gözcü</p>
+
+  </body>
+</html>
+
+
